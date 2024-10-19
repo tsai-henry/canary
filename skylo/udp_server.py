@@ -4,8 +4,9 @@ import socket
 udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # 2. Bind the socket to all network interfaces
+address = "0.0.0.0"
 port = 51820
-server_address = ("0.0.0.0", port)
+server_address = (address, port)
 udp_server.bind(server_address)
 
 print(f"UDP server is listening on {server_address}")
