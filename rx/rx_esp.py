@@ -16,11 +16,12 @@ try:
 
     while True:
         try:
+            data = client_socket.recv(1024).decode().strip()
             data = client_socket.recv(1024).decode()
             data = int(data) + diff
             print("Received:", data)
             with open("../sensor_data/child1.txt", 'w') as f:
-                f.write(f"{data}")
+                f.write(f"{data},1")
         except KeyboardInterrupt:
             break
         except:
