@@ -7,6 +7,8 @@ esp8266_port = 8080
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.settimeout(10)  # 10s timeout
 
+diff = -200
+
 try:
     print("Attempting to connect to ESP8266...")
     client_socket.connect((esp8266_ip, esp8266_port))
@@ -15,6 +17,7 @@ try:
     while True:
         try:
             data = client_socket.recv(1024).decode()
+            data = int(data) + diff
             print("Received:", data)
             with open("../sensor_data/child1.txt", 'w') as f:
                 f.write(f"{data}")
