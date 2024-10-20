@@ -1,3 +1,0 @@
-asyncio
-bleak
-python-dotenv
