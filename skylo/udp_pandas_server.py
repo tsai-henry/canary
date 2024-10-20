@@ -5,6 +5,17 @@ from datetime import datetime
 CHILD_IP = "1.1.1.1"
 HUB_IP = "2.2.2.2"
 
+child_temp_diff = -140
+hub_temp_diff = -150
+
+def calibrate_child_temp(celsius_temp):
+    fahrenheit = 1.8 * celsius_temp + 32
+    return fahrenheit + child_temp_diff
+
+def calibrate_hub_temp(celsius_temp):
+    fahrenheit = 1.8 * celsius_temp + 32
+    return fahrenheit + hub_temp_diff
+
 # Create UDP server
 udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 address = "0.0.0.0"
@@ -17,32 +28,28 @@ print(f"UDP server is listening on {server_address}")
 columns = ["timestamp", "source", "data"]
 df = pd.DataFrame(columns=columns)
 
-# 4. Function to save a new packet to the DataFrame
+# Function to save a new packet to the DataFrame
 def save_packet_to_dataframe(timestamp, source, data):
     global df  # Reference the global DataFrame
+    source = "child" if (source == 0) else "hub"
     new_entry = pd.DataFrame([[timestamp, source, data]], columns=columns)
     df = pd.concat([df, new_entry], ignore_index=True)
     print(f"Saved packet from {source} at {timestamp}")
 
-# 5. Start receiving packets in a loop
-i = 0 # Random counter
 try:
     while True:
         # Receive data from the client
         source = "unknown"
         data, client_address = udp_server.recvfrom(1024)  # Buffer size 1024 bytes
         decoded_data = data.decode()
-
+        temp = decoded_data[0]
+        source = decoded_data[1]
+        
         # Capture the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # if client_address[0] == CHILD_IP:
-        #     source = "child"
-        # elif client_address[0] == HUB_IP:
-        #     source = "hub"
-        
-        # Remove once we have 2 IP addresses
-        if i % 2 == 0:
+        # 0 is child sensor tag, 1 is hub sensor tag
+        if source == 0
             source = "child"
         else:
             source = "hub"
@@ -52,8 +59,6 @@ try:
 
         # Optional: Send a confirmation response to the client
         udp_server.sendto("Packet received".encode(), client_address)
-        
-        i += 1
 
 except KeyboardInterrupt:
     print("\nServer stopped by user.")
