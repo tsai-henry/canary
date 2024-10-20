@@ -1,14 +1,18 @@
 import time
 import serial
 
-class RaspiSerial:
+
+COM_PORT = r'\\.\COM8'
+
+class ComputerSerial:
     def __init__(self, address: str, 
-                 baudrate: int = 460800,
+                 baudrate: int = 115200,
                  timeout: int = 0,
                  wait_time: int = 1,
                  latitude = "37.783860",
                  longitude = "-122.402311",
-                 string_encoding = 'utf-8'):
+                 string_encoding = 'utf-8',
+                 ):
         """
         Initialize the serial connection and configure basic settings.
         
@@ -32,20 +36,25 @@ class RaspiSerial:
         # Initialize the serial connection
         self.connection = serial.Serial(address, baudrate, timeout=timeout)
         
-        # Initialize the Skylo board
-        self.init_skylo()
 
         # Define AT commands
         self.commands = {
             "fun": f'AT+cfun=1\r',
             "pos": f'AT%NTNCFG="POS","STAT","{self.latitude}","{self.longitude}","160"\r',
-            "allocate": f'AT%SOCKETCMD=“ALLOCATE”,0,”UDP”,“OPEN”,“34.19.125.150”,51820"\r',
-            "setopt": f'AT%SOCKETCMD="SETOPT",{self.socket},36000\r',
-            "activate": f'AT%SOCKETCMD="ACTIVATE",{self.socket}\r',
-            "send": f'AT%SOCKETDATA="SEND",{self.socket},13,', # Trailing comma for message
-            "info": f'AT%SOCKETCMD="INFO",{self.socket}',
-            "close": f'AT%SOCKETCMD="DELETE",{self.socket}'
+            "allocate": f'AT%SOCKETCMD="ALLOCATE",0,"UDP","OPEN","34.19.125.150",51820\r',
         }
+
+        # Initialize the Skylo board
+        self.init_skylo()
+
+        self.commands["setopt"] = f'AT%SOCKETCMD="SETOPT",{self.socket},36000\r'
+        self.commands["activate"] = f'AT%SOCKETCMD="ACTIVATE",{self.socket}\r'
+        self.commands["send"] = f'AT%SOCKETDATA="SEND",{self.socket},13,'  # Trailing comma for message
+        self.commands["info"] = f'AT%SOCKETCMD="INFO",{self.socket}'
+        self.commands["close"] = f'AT%SOCKETCMD="DELETE",{self.socket}'
+        
+        self.send_command(self.commands["setopt"])
+        self.send_command(self.commands["activate"])
 
     def send_command(self, command: str):
         """
@@ -64,8 +73,7 @@ class RaspiSerial:
         self.send_command(self.commands["fun"])
         self.send_command(self.commands["pos"])
         self.send_command(self.commands["allocate"])
-        self.send_command(self.commands["setopt"])
-        self.send_command(self.commands["activate"])
+
 
     def send_udp(self, message: str):
         """
@@ -87,7 +95,7 @@ class RaspiSerial:
 # Example usage:
 if __name__ == "__main__":
     # Initialize the serial connection
-    raspi = RaspiSerial(address="/dev/ttyACM0")
+    raspi = ComputerSerial(address=COM_PORT)
 
     try:
         # Initialize Skylo settings
@@ -102,10 +110,36 @@ if __name__ == "__main__":
 
 
 # AT commands from Stacey:
+
+#OTHER CMDS
+# AT+CFUN=0
+# AT%IGNSSEV="FIX",1
+# AT%NOTIFYEV="SIB31",1
+#AT+CEREG=2
+#AT%IGNSSACT=1
+
+
+
+
+
 # AT+cfun=1
 # AT%NTNCFG="POS","STAT","37.783860","-122.402311","160"
+# ----- start extra commands ----------
+# AT+CFUN=0
+# AT%IGNSSEV="FIX",1
+# AT%NOTIFYEV="SIB31",1
+#AT+CEREG=2
+#AT%IGNSSACT=1
+# ------- end extra commands ---------
 
-# AT%SOCKETCMD=“ALLOCATE”,0,”UDP”,“OPEN”,“34.19.125.150”,51820
+# AT%SOCKETCMD="ALLOCATE",0,"UDP","OPEN","34.19.125.150",51820
 # AT%SOCKETCMD="SETOPT",2,36000
 # AT%SOCKETCMD="ACTIVATE",2
 # AT%SOCKETDATA="SEND",2,13,"48656C6C6F2C20776F726C6421"
+
+def s(command):
+    pc.write((command + '\r').encode())
+    sleep(2)
+    return pc.read
+
+
