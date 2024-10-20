@@ -12,18 +12,18 @@ try:
     client_socket.connect((esp8266_ip, esp8266_port))
     print("Connected to ESP8266!")
 
-    cnt = 1000
-    while cnt > 0:
+    while True:
         try:
             data = client_socket.recv(1024).decode()
             print("Received:", data)
+            with open("../sensor_data/child1.txt", 'w') as f:
+                f.write(f"{data}")
         except KeyboardInterrupt:
             break
         except:
             print("Waiting for data stream...")
-        cnt -= 1
 
 finally:
     client_socket.close()
-    print("Connection closed.")
+    print("\nConnection closed.")
 
