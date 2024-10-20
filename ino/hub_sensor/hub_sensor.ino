@@ -3,7 +3,7 @@
 void setup()
 {
     Serial.begin(9600); // monitor
-    //Serial1.begin(9600); // rx tx
+    // no Serial1
 }
  void loop()
 {   
@@ -12,6 +12,5 @@ void setup()
     voltage = analogRead(0); // A0
     temp = (500 * voltage) / 1024;
     Serial.println(temp);
-    //Serial1.println(temp);
     delay(1000);
 }
