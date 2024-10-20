@@ -14,7 +14,7 @@ def capture_serial_data():
                     print(f"Received: {data}") 
                     
                     with open(output_file, 'w') as file:
-                        file.write(f"{data}\n") #overwrite first line
+                        file.write(f"{data},0") #overwrite first line
                 time.sleep(1)
 
     except serial.SerialException as e:
