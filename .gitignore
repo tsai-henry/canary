@@ -1,2 +1,3 @@
 rx_esp/.env
 rx_esp/.venv/*
+sensor_data/*
